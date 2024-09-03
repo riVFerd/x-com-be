@@ -1,0 +1,44 @@
+<html lang="en">
+<head>
+    <title>Hello Hono!</title>
+</head>
+<body>
+<h1>Hello Hono!</h1>
+<input type="text" id="name" value="USER"/>
+<div>
+    <ul id='chat'>
+        <li>Start of the chat</li>
+    </ul>
+</div>
+<div>
+    <input id="inputText" type="text"/>
+    <button id={'btn'} onclick="handleBtnClick()">Send</button>
+</div>
+<script>
+    let socket = new WebSocket("ws://localhost:3000/ws")
+
+    socket.onopen = function (e) {
+        socket.send("My name is John");
+    };
+
+    socket.onmessage = function (event) {
+        let chat = document.getElementById('chat');
+        let li = document.createElement('li');
+        li.appendChild(document.createTextNode(event.data));
+        chat.appendChild(li);
+    };
+
+    function handleBtnClick() {
+        let name = document.getElementById('name').value;
+        let inputText = document.getElementById('inputText');
+        socket.send(JSON.stringify(
+            {
+                username: name,
+                message: inputText.value
+            }
+        ));
+        inputText.value = '';
+    }
+</script>
+</body>
+</html>
