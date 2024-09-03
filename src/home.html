@@ -4,10 +4,15 @@
 </head>
 <body>
 <h1>Hello Hono!</h1>
+<div>
+    <h1>Room status: </h1>
+    <h2 id="roomStatus">Not connected</h2>
+    <input type="text" id="roomId" value="0000"/>
+    <button onclick="connect()">Connect</button>
+</div>
 <input type="text" id="name" value="USER"/>
 <div>
     <ul id='chat'>
-        <li>Start of the chat</li>
     </ul>
 </div>
 <div>
@@ -15,18 +20,7 @@
     <button id={'btn'} onclick="handleBtnClick()">Send</button>
 </div>
 <script>
-    let socket = new WebSocket("ws://localhost:3000/ws")
-
-    socket.onopen = function (e) {
-        socket.send("My name is John");
-    };
-
-    socket.onmessage = function (event) {
-        let chat = document.getElementById('chat');
-        let li = document.createElement('li');
-        li.appendChild(document.createTextNode(event.data));
-        chat.appendChild(li);
-    };
+    let socket = new WebSocket("ws://localhost:3000/x-com");
 
     function handleBtnClick() {
         let name = document.getElementById('name').value;
@@ -38,6 +32,33 @@
             }
         ));
         inputText.value = '';
+    }
+
+    function connect() {
+        // socket.onclose(() => {});
+
+        const chat = document.getElementById('chat');
+        while (chat.firstChild) {
+            chat.removeChild(chat.firstChild);
+        }
+        let roomId = document.getElementById('roomId').value;
+        console.log('Connecting to room: ' + roomId);
+        socket = new WebSocket("ws://localhost:3000/x-com/" + roomId);
+
+        socket.onopen = function (e) {
+            document.getElementById('roomStatus').innerText = 'Connected';
+        };
+
+        socket.onclose = function (e) {
+            document.getElementById('roomStatus').innerText = 'Not connected';
+        };
+
+        socket.onmessage = function (event) {
+            const li = document.createElement('li');
+            const data = JSON.parse(event.data);
+            li.appendChild(document.createTextNode(data));
+            chat.appendChild(li);
+        };
     }
 </script>
 </body>
